@@ -35,7 +35,7 @@ The author assumes no liability for any decisions made based on the output of th
 ## Setup and Local Usage
 
 1. Clone the repository
-git clone https://github.com/yourusername/voice-guided-health-assistant.git
+git clone https://github.com/sufirumii/Voice-Guided-Health-Assistant-Powered-by-Llama-3.3-70B.git
 text2. Open `index.html` directly in a modern browser (Chrome, Edge, or Firefox recommended for best speech support)
 
 No build step or server is required.
