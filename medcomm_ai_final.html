@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedComm AI - Powered by Llama 3.3 70B</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00fff2;
+            border-radius: 50%;
+            animation: float 15s infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-100vh) translateX(50px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            background: linear-gradient(90deg, #00fff2, #0080ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 242, 0.5);
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .header p {
+            font-size: 1.2em;
+            color: #00fff2;
+            opacity: 0.8;
+        }
+
+        /* Main Interface */
+        .main-interface {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 242, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 255, 242, 0.1);
+        }
+
+        .mode-selector {
+            margin-bottom: 30px;
+        }
+
+        .mode-selector h3 {
+            color: #00fff2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .mode-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(0, 255, 242, 0.1);
+            border: 2px solid rgba(0, 255, 242, 0.3);
+            border-radius: 10px;
+            color: #00fff2;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-btn:hover {
+            background: rgba(0, 255, 242, 0.2);
+            border-color: #00fff2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 242, 0.3);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, rgba(0, 255, 242, 0.3), rgba(0, 128, 255, 0.3));
+            border-color: #00fff2;
+            font-weight: bold;
+        }
+
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .mode-btn:hover::before {
+            left: 100%;
+        }
+
+        .file-upload-section {
+            margin-top: 30px;
+        }
+
+        .file-upload-section h3 {
+            color: #00fff2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .file-upload-area {
+            border: 2px dashed rgba(0, 255, 242, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 255, 242, 0.05);
+        }
+
+        .file-upload-area:hover {
+            border-color: #00fff2;
+            background: rgba(0, 255, 242, 0.1);
+            transform: scale(1.02);
+        }
+
+        .file-upload-area i {
+            font-size: 3em;
+            color: #00fff2;
+            margin-bottom: 10px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .uploaded-file {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 255, 242, 0.2);
+            border-radius: 8px;
+            color: #00fff2;
+            font-size: 0.9em;
+        }
+
+        /* Main Chat Area */
+        .chat-container {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 242, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 255, 242, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 220px);
+        }
+
+        /* Chat Messages */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 80%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, rgba(0, 255, 242, 0.2), rgba(0, 128, 255, 0.2));
+            border: 1px solid rgba(0, 255, 242, 0.3);
+            color: #e0e0e0;
+        }
+
+        .message.ai .message-content {
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            text-align: left;
+            padding: 10px;
+            max-width: 100%;
+        }
+
+        .message.ai .message-content .multi-agent-container {
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.05), rgba(128, 0, 255, 0.05));
+            border: 1px solid rgba(255, 0, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .message-label {
+            font-size: 0.9em;
+            color: #00fff2;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* AI Response in large font when speaking */
+        .speaking-display {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 26, 0.95);
+            padding: 40px 60px;
+            border-radius: 20px;
+            border: 2px solid #00fff2;
+            box-shadow: 0 0 50px rgba(0, 255, 242, 0.5);
+            z-index: 1000;
+            max-width: 80%;
+        }
+
+        .speaking-display.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .speaking-text {
+            font-size: 2.5em;
+            color: #00fff2;
+            text-align: center;
+            line-height: 1.4;
+            animation: textGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes textGlow {
+            0%, 100% { text-shadow: 0 0 10px rgba(0, 255, 242, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(0, 255, 242, 1); }
+        }
+
+        /* Input Area */
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(0, 255, 242, 0.1);
+            border: 2px solid rgba(0, 255, 242, 0.3);
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 1.1em;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #messageInput:focus {
+            border-color: #00fff2;
+            box-shadow: 0 0 20px rgba(0, 255, 242, 0.3);
+        }
+
+        #sendBtn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #00fff2, #0080ff);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a1a;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 242, 0.5);
+        }
+
+        #sendBtn:active {
+            transform: translateY(0);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 5px;
+        }
+
+        .loading-dot {
+            width: 12px;
+            height: 12px;
+            background: #00fff2;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Control Buttons */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background: rgba(0, 255, 242, 0.2);
+            border: 1px solid rgba(0, 255, 242, 0.3);
+            border-radius: 8px;
+            color: #00fff2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 242, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Multi-Agent Analysis Styles */
+        .multi-agent-container {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .analysis-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 255, 242, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 242, 0.2);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 242, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00fff2;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #a0a0a0;
+        }
+
+        .doctor-section {
+            margin: 12px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .doctor-section:hover {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 255, 242, 0.3);
+        }
+
+        .doctor-section[open] {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .doctor-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            user-select: none;
+            background: rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .doctor-header:hover {
+            background: rgba(0, 0, 0, 0.4);
+            padding-left: 25px;
+        }
+
+        .doctor-icon {
+            font-size: 1.3em;
+        }
+
+        .doctor-name {
+            flex: 1;
+        }
+
+        .expand-icon {
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+        }
+
+        .doctor-section[open] .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .doctor-content {
+            padding: 20px;
+            color: #e0e0e0;
+            line-height: 1.8;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .table-row {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table-row:first-of-type {
+            font-weight: bold;
+            color: #00fff2;
+            border-bottom: 2px solid rgba(0, 255, 242, 0.3);
+        }
+
+        .table-cell {
+            flex: 1;
+            padding: 5px;
+        }
+
+        .bullet-point {
+            padding: 5px 0 5px 20px;
+            position: relative;
+        }
+
+        .bullet-point:before {
+            content: '•';
+            position: absolute;
+            left: 5px;
+            color: #00fff2;
+        }
+
+        .numbered-point {
+            padding: 5px 0 5px 10px;
+        }
+
+        /* Scrollbar styling */
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00fff2, #0080ff);
+            border-radius: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .main-interface {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2.5em;
+            }
+            .speaking-text {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-particles" id="particles"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>MEDCOMM AI</h1>
+            <p>Powered by Llama 3.3 70B - Advanced Healthcare Intelligence System</p>
+        </div>
+
+        <div class="main-interface">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="mode-selector">
+                    <h3>🎯 AI MODE</h3>
+                    <button class="mode-btn active" data-mode="general">💬 General Healthcare Chat</button>
+                    <button class="mode-btn" data-mode="symptom">🔍 Symptom Analysis</button>
+                    <button class="mode-btn" data-mode="document">📄 Document Analysis</button>
+                    <button class="mode-btn" data-mode="medication">💊 Medication Guide</button>
+                    <button class="mode-btn" data-mode="report">📊 Medical Report Interpreter</button>
+                </div>
+
+                <div class="file-upload-section">
+                    <h3>📎 Upload Document</h3>
+                    <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                        <div style="font-size: 3em; color: #00fff2;">📁</div>
+                        <p>Click to upload PDF, Image, or Text file</p>
+                        <p style="font-size: 0.8em; opacity: 0.7; margin-top: 10px;">Medical reports, prescriptions, lab results</p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.txt">
+                    <div id="uploadedFileName" class="uploaded-file" style="display: none;"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn" onclick="clearChat()">🗑️ Clear Chat</button>
+                    <button class="control-btn" onclick="exportChat()">💾 Export</button>
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="chat-container">
+                <div class="messages-container" id="messagesContainer">
+                    <div class="message ai">
+                        <div class="message-label">🤖 MedComm AI</div>
+                        <div class="message-content">
+                            Hello! I'm your AI healthcare assistant. I can help you with:
+                            <br><br>
+                            ✅ Symptom analysis and health queries<br>
+                            ✅ Medical document interpretation<br>
+                            ✅ Medication information<br>
+                            ✅ General health guidance<br>
+                            <br>
+                            How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="loading-dots">
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                    </div>
+                    <p style="color: #00fff2; margin-top: 10px;">AI is thinking...</p>
+                </div>
+
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Type your message or use voice..." onkeypress="handleKeyPress(event)">
+                    <button id="sendBtn" onclick="sendMessage()">Send 🚀</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Speaking Display Overlay -->
+    <div class="speaking-display" id="speakingDisplay">
+        <div class="speaking-text" id="speakingText"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const HF_TOKEN = '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';
+        const API_URL = 'https://router.huggingface.co/v1/chat/completions';
+        
+        let currentMode = 'general';
+        let uploadedFile = null;
+        let uploadedFileContent = null;
+        let conversationHistory = [];
+        let synthesis = window.speechSynthesis;
+
+        // Create background particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Mode Selection
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMode = this.dataset.mode;
+                addSystemMessage(`Mode switched to: ${this.textContent}`);
+            });
+        });
+
+        // File Upload
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadedFile = file;
+                document.getElementById('uploadedFileName').style.display = 'block';
+                document.getElementById('uploadedFileName').textContent = `📎 ${file.name}`;
+                
+                // Read file content
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedFileContent = e.target.result;
+                    addSystemMessage(`File uploaded: ${file.name}. You can now ask questions about this document.`);
+                };
+                
+                if (file.type === 'application/pdf') {
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('image/')) {
+                    reader.readAsDataURL(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            }
+        });
+
+        // Text to Speech
+        function speak(text) {
+            // Cancel any ongoing speech
+            synthesis.cancel();
+
+            // Extract summary for multi-agent responses
+            let speechText = text;
+            if (text.includes('FINAL ASSESSMENT') || text.includes('MOST LIKELY DIAGNOSIS')) {
+                // Extract just the diagnosis and confidence
+                const diagnosisMatch = text.match(/MOST LIKELY DIAGNOSIS[\s\S]*?\*\*(.+?)\*\*[\s\S]*?Confidence:\s*(\d+)%/);
+                if (diagnosisMatch) {
+                    speechText = `Based on multi-agent analysis, the most likely diagnosis is ${diagnosisMatch[1]} with ${diagnosisMatch[2]} percent confidence. Please review the detailed analysis on screen for complete recommendations.`;
+                } else {
+                    // Fallback: just take first 2 sentences
+                    const sentences = text.replace(/[#*]/g, '').split(/[.!?]+/).filter(s => s.trim().length > 0);
+                    speechText = sentences.slice(0, 2).join('. ') + '.';
+                }
+            } else if (text.length > 300) {
+                // For long regular responses, take first few sentences
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                speechText = sentences.slice(0, 3).join('. ') + '. Please see the full response on screen.';
+            }
+
+            // Show large text display
+            const speakingDisplay = document.getElementById('speakingDisplay');
+            const speakingText = document.getElementById('speakingText');
+            speakingText.textContent = speechText;
+            speakingDisplay.classList.add('active');
+
+            // Create utterance
+            const utterance = new SpeechSynthesisUtterance(speechText);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+
+            utterance.onend = function() {
+                speakingDisplay.classList.remove('active');
+            };
+
+            synthesis.speak(utterance);
+        }
+
+        // Get system prompt based on mode
+        function getSystemPrompt() {
+            const prompts = {
+                general: "You are MedComm AI, an advanced healthcare assistant. Provide accurate, empathetic medical information. Always remind users to consult healthcare professionals for diagnosis.",
+                symptom: "You are a symptom analysis specialist. Ask relevant questions to understand symptoms, provide possible causes, and recommend when to seek medical care. Be thorough but not alarming.",
+                document: "You are a medical document interpreter. Analyze medical reports, lab results, and prescriptions. Explain medical terms in simple language and highlight important findings.",
+                medication: "You are a medication information specialist. Provide details about medications, dosages, interactions, side effects, and precautions. Always emphasize following doctor's instructions.",
+                report: "You are a medical report analyst. Interpret lab results, imaging reports, and clinical notes. Explain values, reference ranges, and clinical significance in patient-friendly language."
+            };
+            return prompts[currentMode] || prompts.general;
+        }
+
+        // Send Message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message && !uploadedFile) return;
+            if (message) {
+                addMessage(message, 'user');
+                conversationHistory.push({
+                    role: 'user',
+                    content: message
+                });
+            }
+
+            input.value = '';
+            document.getElementById('loading').classList.add('active');
+
+            try {
+                // Prepare messages
+                const messages = [
+                    {
+                        role: 'system',
+                        content: getSystemPrompt()
+                    },
+                    ...conversationHistory
+                ];
+
+                // If there's an uploaded file, add it to the latest message
+                if (uploadedFile && uploadedFileContent) {
+                    const lastMessage = messages[messages.length - 1];
+                    
+                    if (uploadedFile.type.startsWith('image/')) {
+                        lastMessage.content = [
+                            {
+                                type: 'text',
+                                text: message || 'Please analyze this medical image.'
+                            },
+                            {
+                                type: 'image_url',
+                                image_url: {
+                                    url: uploadedFileContent
+                                }
+                            }
+                        ];
+                    } else {
+                        lastMessage.content = `${message}\n\nDocument content:\n${uploadedFileContent}`;
+                    }
+                }
+
+                // Call API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${HF_TOKEN}`
+                    },
+                    body: JSON.stringify({
+                        model: 'meta-llama/Llama-3.3-70B-Instruct:groq',
+                        messages: messages,
+                        max_tokens: 2000,
+                        temperature: 0.7
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.choices && data.choices[0]) {
+                    const aiResponse = data.choices[0].message.content;
+                    addMessage(aiResponse, 'ai');
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: aiResponse
+                    });
+
+                    // Speak the response
+                    speak(aiResponse);
+                } else {
+                    throw new Error('Invalid response from API');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('⚠️ Sorry, I encountered an error. Please try again.', 'ai');
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        // Format multi-agent analysis
+        function formatMultiAgentAnalysis(text) {
+            // Check if it's a multi-agent response
+            if (!text.includes('Dr.') && !text.includes('FINAL ASSESSMENT')) {
+                return text; // Return as-is for regular responses
+            }
+
+            let html = '<div class="multi-agent-container">';
+            
+            // Extract summary stats if present
+            const statsMatch = text.match(/(\d+)\s*Factors Analyzed[\s\S]*?(\d+)\s*Possible Diagnoses[\s\S]*?(\d+)%\s*Agent Consensus/);
+            if (statsMatch) {
+                html += `
+                <div class="analysis-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${statsMatch[1]}</div>
+                        <div class="stat-label">Factors Analyzed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${statsMatch[2]}</div>
+                        <div class="stat-label">Diagnoses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${statsMatch[3]}%</div>
+                        <div class="stat-label">Consensus</div>
+                    </div>
+                </div>
+                `;
+            }
+
+            // Split by doctors
+            const sections = text.split(/(?=🩺|❤️|🧪|🎯)/);
+            
+            sections.forEach(section => {
+                if (!section.trim()) return;
+                
+                // Detect doctor type
+                let doctorName = '';
+                let icon = '';
+                let color = '#00fff2';
+                
+                if (section.includes('Dr. Primary Care') || section.includes('🩺')) {
+                    doctorName = 'Primary Care';
+                    icon = '🩺';
+                    color = '#00fff2';
+                } else if (section.includes('Dr. Cardiology') || section.includes('❤️')) {
+                    doctorName = 'Cardiology';
+                    icon = '❤️';
+                    color = '#ff4757';
+                } else if (section.includes('Dr. Diagnostics') || section.includes('🧪')) {
+                    doctorName = 'Diagnostics';
+                    icon = '🧪';
+                    color = '#ffa502';
+                } else if (section.includes('Final Clinical Assessment') || section.includes('🎯')) {
+                    doctorName = 'Final Assessment';
+                    icon = '🎯';
+                    color = '#00ff88';
+                }
+
+                if (doctorName) {
+                    // Extract key points (first 200 chars as preview)
+                    const preview = section.substring(0, 200).replace(/[#*]/g, '').trim() + '...';
+                    const fullContent = section.replace(/[#]/g, '').trim();
+                    
+                    html += `
+                    <details class="doctor-section" style="border-left: 4px solid ${color};">
+                        <summary class="doctor-header" style="color: ${color};">
+                            <span class="doctor-icon">${icon}</span>
+                            <span class="doctor-name">Dr. ${doctorName}</span>
+                            <span class="expand-icon">▼</span>
+                        </summary>
+                        <div class="doctor-content">
+                            ${formatSectionContent(fullContent)}
+                        </div>
+                    </details>
+                    `;
+                }
+            });
+
+            html += '</div>';
+            return html;
+        }
+
+        function formatSectionContent(content) {
+            // Format tables
+            content = content.replace(/\|(.+)\|/g, (match) => {
+                const cells = match.split('|').filter(c => c.trim());
+                if (cells.length > 0) {
+                    return '<div class="table-row">' + 
+                           cells.map(c => `<div class="table-cell">${c.trim()}</div>`).join('') + 
+                           '</div>';
+                }
+                return match;
+            });
+
+            // Format bold text
+            content = content.replace(/\*\*(.+?)\*\*/g, '<strong style="color: #00fff2;">$1</strong>');
+            
+            // Format bullet points
+            content = content.replace(/^- (.+)$/gm, '<div class="bullet-point">• $1</div>');
+            
+            // Format numbered lists
+            content = content.replace(/^\d+\.\s+(.+)$/gm, '<div class="numbered-point">$&</div>');
+            
+            // Preserve line breaks
+            content = content.replace(/\n/g, '<br>');
+            
+            return content;
+        }
+
+        // Add Message to Chat
+        function addMessage(text, sender) {
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const label = sender === 'user' ? '👤 You' : '🤖 MedComm AI';
+            
+            // Format message content
+            const formattedContent = sender === 'ai' ? formatMultiAgentAnalysis(text) : text;
+            
+            messageDiv.innerHTML = `
+                <div class="message-label">${label}</div>
+                <div class="message-content">${formattedContent}</div>
+            `;
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Add System Message
+        function addSystemMessage(text) {
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `
+                <div class="message-content" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); text-align: center; font-style: italic;">
+                    ℹ️ ${text}
+                </div>
+            `;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Clear Chat
+        function clearChat() {
+            if (confirm('Clear all conversation history?')) {
+                document.getElementById('messagesContainer').innerHTML = `
+                    <div class="message ai">
+                        <div class="message-label">🤖 MedComm AI</div>
+                        <div class="message-content">
+                            Chat cleared. How can I help you today?
+                        </div>
+                    </div>
+                `;
+                conversationHistory = [];
+                uploadedFile = null;
+                uploadedFileContent = null;
+                document.getElementById('uploadedFileName').style.display = 'none';
+            }
+        }
+
+        // Export Chat
+        function exportChat() {
+            const messages = document.querySelectorAll('.message');
+            let exportText = '=== MedComm AI Conversation Export ===\n\n';
+            
+            messages.forEach(msg => {
+                const label = msg.querySelector('.message-label')?.textContent || '';
+                const content = msg.querySelector('.message-content')?.textContent || '';
+                exportText += `${label}\n${content}\n\n`;
+            });
+
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `medcomm-chat-${Date.now()}.txt`;
+            a.click();
+        }
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Stop speech on click outside
+        document.getElementById('speakingDisplay').addEventListener('click', function() {
+            synthesis.cancel();
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
